@@ -1,0 +1,141 @@
+<!--
+  Generated template for the AdicionarItensPage page.
+
+  See http://ionicframework.com/docs/components/#navigation for more info on
+  Ionic pages and navigation.
+-->
+<ion-header>
+
+  <ion-navbar>
+    <ion-title>Adicionar Elementos</ion-title>
+  </ion-navbar>
+
+</ion-header>
+
+
+<ion-content>
+
+  <lottie-animation-view *ngIf="sucesso" [options]="lottieConfig" [width]="300" [height]="600">
+  </lottie-animation-view>
+  <div *ngIf="!sucesso">
+    <ion-searchbar color="danger" placeholder="Produto" [(ngModel)]="myInput" [showCancelButton]="shouldShowCancel"
+      (ionInput)="onInput($event)" (ionCancel)="onCancel($event)">
+    </ion-searchbar>
+
+    <ion-list *ngIf="produtoSelecionado == null">
+      <ion-item *ngFor="let p of produtos" (click)="add(p)">
+        <ion-avatar item-start>
+          <ion-icon name="cart"></ion-icon>
+        </ion-avatar>
+        <h1>{{p.nome}}</h1>
+        <h4>Categoria: {{p.categoria.nome}}</h4>
+        <h3 *ngIf="p.categoria.nome != 'Pizza' && p.categoria.nome != 'Pizzas'
+      && p.categoria.nome != 'pizza' && p.categoria.nome != 'pizzas'" style="color: maroon">Valor: {{p.valor_venda.toLocaleString('pt-br')}}
+        </h3>
+        <h3 *ngIf="p.categoria.nome == 'Pizza' || p.categoria.nome == 'Pizzas'
+      || p.categoria.nome == 'pizza' || p.categoria.nome == 'pizzas'" style="color: maroon">Valor: por tamanho</h3>
+      </ion-item>
+    </ion-list>
+
+    <div *ngIf="produtoSelecionado != null">
+      <ion-card>
+        <ion-card-header>
+          <h2 id="title" text-center>{{produtoSelecionado.nome}}</h2>
+          <br>
+          <h2 *ngIf="!produtoPizza && !produtoSelecionado.valor_livre">VALOR: <strong>Gs
+              {{produtoSelecionado.valor_venda.toLocaleString('pt-br')}}</strong></h2>
+          <!-- <h2 *ngIf="!produtoPizza">VALOR: <strong>R$ {{produto.valor_venda.replace('.', ',')}}</strong></h2> -->
+          <h4>UN VENTA: <strong>{{produtoSelecionado.unidade_venda}}</strong></h4>
+          <h4>COD BARRAS: <strong>{{produtoSelecionado.codBarras}}</strong></h4>
+        </ion-card-header>
+
+      </ion-card>
+
+      <ion-list radio-group [(ngModel)]="tamanhoSelecionado">
+
+        <ion-item *ngFor="let t of tamanhosDePizza">
+          <ion-label>{{t.nome}} <strong style="color: #000; font-size: 20px;">{{t.pedacos}} Pedazos</strong></ion-label>
+          <ion-radio (click)="buscaValorPizza()" value="{{t.id}}"></ion-radio>
+        </ion-item>
+      </ion-list>
+
+      <h1 *ngIf="valorPizzaPorTamanho > 0" id="valor_pizza">Valor de la Pizza:
+        <strong>{{valorPizzaPorTamanho | currency:"BRL":true:"1.2" }}</strong>
+      </h1>
+
+
+      <ion-card *ngIf="produtoPizza">
+        <ion-list>
+          <ion-card-header>
+            Sabores de esta Pizza
+          </ion-card-header>
+          <ion-item>
+            <ion-label style="color: red;">1/{{totalSabores}} - {{produtoSelecionado.nome}}</ion-label>
+          </ion-item>
+          <ion-item *ngFor="let sabor of saboresExtrasPizza">
+            <ion-label style="color: red">1/{{totalSabores}} - {{sabor.produto.produto.nome}}</ion-label>
+          </ion-item>
+        </ion-list>
+      </ion-card>
+
+      <button *ngIf="produtoPizza" full ion-button color="danger" (click)="addSabor()">
+        Adicionar + Sabor </button>
+
+
+      <ion-item padding *ngIf="produtoSelecionado.valor_livre == 1">
+        <ion-label floating color="primary">VALOR FLEXIBLE</ion-label>
+        <ion-input [(ngModel)]="valorFlex" type="number"></ion-input>
+      </ion-item>
+      <ion-item padding>
+        <ion-label floating color="primary">CANTIDAD</ion-label>
+        <ion-input [(ngModel)]="quantidade" type="number"></ion-input>
+      </ion-item>
+
+      <ion-card>
+        <ion-card-header>
+          <ion-searchbar placeholder="Adicionais" (ionInput)="searchAdicional($event)" [(ngModel)]="myAdicional"
+            debounce=500>
+          </ion-searchbar>
+          <ion-list *ngIf="this.myAdicional">
+            <ion-item (click)="selecionaAdicional(a)" *ngFor="let a of adicionais">
+              {{a.nome}} - Gs {{a.valor}}
+            </ion-item>
+          </ion-list>
+        </ion-card-header>
+
+        <ion-card-content>
+          <h3>Lista de Adicionales</h3>
+          <ion-chip *ngFor="let a of adicionaisSelecionados">
+
+            <ion-label>{{a.nome}}</ion-label>
+            <button ion-button clear color="danger" (click)="deleteAdicional(a)">
+              <ion-icon name="close-circle"></ion-icon>
+            </button>
+          </ion-chip>
+
+          <!-- <ion-chip #chip3>
+  
+          <ion-label>Queijo Prato</ion-label>
+          <button ion-button clear color="danger" (click)="delete(chip3)">
+            <ion-icon name="close-circle"></ion-icon>
+          </button>
+        </ion-chip> -->
+        </ion-card-content>
+      </ion-card>
+
+      <ion-item padding>
+        <ion-label floating color="primary">OBSERVACIÓN</ion-label>
+        <ion-input [(ngModel)]="obs" type="text"></ion-input>
+      </ion-item>
+      <button (click)="adicionar()" [disabled]="quantidade == 0" ion-button full>ADICIONAR</button>
+
+
+    </div>
+
+    <ion-fab *ngIf="contProdutos > 0" bottom right>
+      <button (click)="enviarItensPresent()" color="danger" ion-fab>
+        <ion-icon name="cart"></ion-icon>{{contProdutos}}
+      </button>
+    </ion-fab>
+  </div>
+</ion-content>
